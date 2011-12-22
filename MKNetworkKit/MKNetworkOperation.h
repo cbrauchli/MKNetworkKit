@@ -33,6 +33,7 @@ typedef void (^MKNKImageBlock) (UIImage* fetchedImage, NSURL* url, BOOL isInCach
 typedef void (^MKNKImageBlock) (NSImage* fetchedImage, NSURL* url, BOOL isInCache);
 #endif
 typedef void (^MKNKErrorBlock)(NSError* error);
+typedef void (^MKNKNotModifiedBlock)();
 
 typedef void (^MKNKAuthBlock)(NSURLAuthenticationChallenge* challenge);
 
@@ -313,6 +314,17 @@ typedef enum {
  *  isCachedResponse
  */
 -(void) onCompletion:(MKNKResponseBlock) response onError:(MKNKErrorBlock) error;
+
+/*!
+ *  @abstract Block Handler for HTTP status 304 (not modified)
+ *  
+ *  @discussion
+ *	This method sets your not modified block. If the server responds with HTTP 304 (not modified), then 
+ *  the MKNKResponseBlock onCompletion blocks will not be called a second time after the cached store call.
+ *  Instead, this block will get called.
+ *  
+ */
+-(void) onNotModified:(MKNKNotModifiedBlock) notModifiedBlock;
 
 /*!
  *  @abstract Block Handler for tracking upload progress

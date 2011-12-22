@@ -50,6 +50,7 @@ typedef enum {
 
 @property (nonatomic, strong) NSMutableArray *responseBlocks;
 @property (nonatomic, strong) NSMutableArray *errorBlocks;
+@property (nonatomic, strong) NSMutableArray *notModifiedBlocks;
 
 @property (nonatomic, assign) MKNetworkOperationState state;
 @property (nonatomic, assign) BOOL isCancelled;
@@ -104,6 +105,7 @@ typedef enum {
 
 @synthesize responseBlocks = _responseBlocks;
 @synthesize errorBlocks = _errorBlocks;
+@synthesize notModifiedBlocks = _notModifiedBlocks;
 
 @synthesize isCancelled = _isCancelled;
 @synthesize mutableData = _mutableData;
@@ -362,6 +364,7 @@ typedef enum {
     [theCopy setClientCertificate:[self.clientCertificate copy]];
     [theCopy setResponseBlocks:[self.responseBlocks copy]];
     [theCopy setErrorBlocks:[self.errorBlocks copy]];
+    [theCopy setNotModifiedBlocks:[self.notModifiedBlocks copy]];
     [theCopy setState:self.state];
     [theCopy setIsCancelled:self.isCancelled];
     [theCopy setMutableData:[self.mutableData copy]];
@@ -384,6 +387,7 @@ typedef enum {
     
     [self.responseBlocks addObjectsFromArray:operation.responseBlocks];
     [self.errorBlocks addObjectsFromArray:operation.errorBlocks];
+    [self.notModifiedBlocks addObjectsFromArray:operation.notModifiedBlocks];
     [self.uploadProgressChangedHandlers addObjectsFromArray:operation.uploadProgressChangedHandlers];
     [self.downloadProgressChangedHandlers addObjectsFromArray:operation.downloadProgressChangedHandlers];
     [self.downloadStreams addObjectsFromArray:operation.downloadStreams];
@@ -431,6 +435,11 @@ typedef enum {
     [self.errorBlocks addObject:[error copy]];
 }
 
+-(void) onNotModified:(MKNKNotModifiedBlock) notModifiedBlock {
+    
+    [self.notModifiedBlocks addObject:[notModifiedBlock copy]];
+}
+
 -(void) onUploadProgressChanged:(MKNKProgressBlock) uploadProgressBlock {
     
     [self.uploadProgressChangedHandlers addObject:[uploadProgressBlock copy]];
@@ -461,6 +470,7 @@ typedef enum {
         
         self.responseBlocks = [NSMutableArray array];
         self.errorBlocks = [NSMutableArray array];        
+        self.notModifiedBlocks = [NSMutableArray array];
         
         self.filesToBePosted = [NSMutableArray array];
         self.dataToBePosted = [NSMutableArray array];
@@ -795,6 +805,9 @@ typedef enum {
     [self.errorBlocks removeAllObjects];
     self.errorBlocks = nil;
     
+    [self.notModifiedBlocks removeAllObjects];
+    self.notModifiedBlocks = nil;
+    
     [self.uploadProgressChangedHandlers removeAllObjects];
     self.uploadProgressChangedHandlers = nil;
     
@@ -1042,6 +1055,9 @@ totalBytesExpectedToWrite:(NSInteger)totalBytesExpectedToWrite {
         }
         else if(self.response.statusCode == 304) {
             DLog(@"%@ not modified", self.url);
+            
+            for(MKNKNotModifiedBlock notModifiedBlock in self.notModifiedBlocks)
+                notModifiedBlock();
         }
         else if(self.response.statusCode == 307) {
             DLog(@"%@ temporarily redirected", self.url);
