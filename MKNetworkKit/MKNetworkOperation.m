@@ -25,6 +25,7 @@
 
 #import "MKNetworkOperation.h"
 #import "NSDictionary+RequestEncoding.h"
+#import "NSDictionary+CaseInsensitive.h"
 #import "NSString+MKNetworkKitAdditions.h"
 
 
@@ -922,7 +923,7 @@
     for(NSOutputStream *stream in self.downloadStreams)
         [stream open];
     
-    NSDictionary *httpHeaders = [self.response allHeaderFields];
+    NSDictionary *httpHeaders = [NSDictionary dictionaryWithDictionaryCaseInsensitive:[self.response allHeaderFields]];
     
     if([self.request.HTTPMethod isEqualToString:@"GET"]) {
         
