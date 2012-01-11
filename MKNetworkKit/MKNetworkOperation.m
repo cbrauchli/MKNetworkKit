@@ -403,12 +403,10 @@
     NSString *eTag = [headers objectForKey:@"ETag"];
     
     if(lastModified) {
-        [self.request setHTTPMethod:@"HEAD"];
         [self.request addValue:lastModified forHTTPHeaderField:@"IF-MODIFIED-SINCE"];
     }
     
     if(eTag) {
-        [self.request setHTTPMethod:@"HEAD"];
         [self.request addValue:eTag forHTTPHeaderField:@"IF-NONE-MATCH"];
     }    
 }
