@@ -28,13 +28,6 @@
 #import "NSString+MKNetworkKitAdditions.h"
 
 
-// Should there be a cancelled state? or something similar.
-typedef enum {
-    MKNetworkOperationStateReady = 1,
-    MKNetworkOperationStateExecuting = 2,
-    MKNetworkOperationStateFinished = 3
-} MKNetworkOperationState;
-
 @interface MKNetworkOperation (/*Private Methods*/)
 @property (strong, nonatomic) NSURLConnection *connection;
 @property (strong, nonatomic) NSString *uniqueId;
@@ -102,6 +95,7 @@ typedef enum {
 @synthesize password = _password;
 @synthesize clientCertificate = _clientCertificate;
 @synthesize authHandler = _authHandler;
+@synthesize operationStateChangedHandler = _operationStateChangedHandler;
 
 @synthesize responseBlocks = _responseBlocks;
 @synthesize errorBlocks = _errorBlocks;
@@ -298,6 +292,10 @@ typedef enum {
             });
 #endif        
             break;
+    }
+    
+    if(self.operationStateChangedHandler) {
+        self.operationStateChangedHandler(newState);
     }
 }
 
@@ -896,10 +894,12 @@ typedef enum {
                 // Cert not trusted, and user is not OK with that. Don't proceed
                 [challenge.sender continueWithoutCredentialForAuthenticationChallenge:challenge];
             }
-        } else {
+        } 
+        else {
             
             // invalid or revoked certificate
-            [challenge.sender continueWithoutCredentialForAuthenticationChallenge:challenge];
+            [challenge.sender useCredential:[NSURLCredential credentialForTrust:challenge.protectionSpace.serverTrust] forAuthenticationChallenge:challenge];
+            //[challenge.sender continueWithoutCredentialForAuthenticationChallenge:challenge];
         }
     }        
     else if (self.authHandler) {
