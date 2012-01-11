@@ -433,7 +433,7 @@
     [self.errorBlocks addObject:[error copy]];
 }
 
--(void) onNotModified:(MKNKNotModifiedBlock) notModifiedBlock {
+-(void) onNotModified:(MKNKResponseBlock) notModifiedBlock {
     
     [self.notModifiedBlocks addObject:[notModifiedBlock copy]];
 }
@@ -1055,9 +1055,7 @@ totalBytesExpectedToWrite:(NSInteger)totalBytesExpectedToWrite {
         }
         else if(self.response.statusCode == 304) {
             DLog(@"%@ not modified", self.url);
-            
-            for(MKNKNotModifiedBlock notModifiedBlock in self.notModifiedBlocks)
-                notModifiedBlock();
+            [self operationNotModified];
         }
         else if(self.response.statusCode == 307) {
             DLog(@"%@ temporarily redirected", self.url);
@@ -1142,6 +1140,11 @@ totalBytesExpectedToWrite:(NSInteger)totalBytesExpectedToWrite {
     
     for(MKNKResponseBlock responseBlock in self.responseBlocks)
         responseBlock(self);
+}
+
+-(void) operationNotModified {
+    for(MKNKResponseBlock notModifiedBlock in self.notModifiedBlocks)
+        notModifiedBlock(self);
 }
 
 -(void) operationFailedWithError:(NSError*) error {

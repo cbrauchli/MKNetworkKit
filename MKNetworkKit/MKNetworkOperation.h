@@ -39,7 +39,6 @@ typedef void (^MKNKImageBlock) (UIImage* fetchedImage, NSURL* url, BOOL isInCach
 typedef void (^MKNKImageBlock) (NSImage* fetchedImage, NSURL* url, BOOL isInCache);
 #endif
 typedef void (^MKNKErrorBlock)(NSError* error);
-typedef void (^MKNKNotModifiedBlock)();
 
 typedef void (^MKNKAuthBlock)(NSURLAuthenticationChallenge* challenge);
 
@@ -341,7 +340,7 @@ typedef enum {
  *  Instead, this block will get called.
  *  
  */
--(void) onNotModified:(MKNKNotModifiedBlock) notModifiedBlock;
+-(void) onNotModified:(MKNKResponseBlock) notModifiedBlock;
 
 /*!
  *  @abstract Block Handler for tracking upload progress
@@ -476,6 +475,8 @@ typedef enum {
  *
  */
 -(void) operationSucceeded;
+
+-(void) operationNotModified;
 
 /*!
  *  @abstract Overridable custom method where you can add your custom business logic error handling
