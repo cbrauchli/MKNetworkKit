@@ -56,6 +56,19 @@
 - (id) initWithHostName:(NSString*) hostName customHeaderFields:(NSDictionary*) headers;
 
 /*!
+ *  @abstract Initializes your network engine with a hostname, port, and custom header fields
+ *  
+ *  @discussion
+ *	Creates an engine for a given host name
+ *  The default headers you specify here will be appened to every operation created in this engine
+ *  The hostname, if not null, initializes a Reachability notifier.
+ *  Network reachability notifications are automatically taken care of by MKNetworkEngine
+ *  Both parameters are optional
+ *  
+ */
+- (id) initWithHostName:(NSString*) hostName port:(NSNumber *) port customHeaderFields:(NSDictionary*) headers;
+
+/*!
  *  @abstract Creates a simple GET Operation with a request URL
  *  
  *  @discussion

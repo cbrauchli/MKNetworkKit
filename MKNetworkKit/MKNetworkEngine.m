@@ -30,6 +30,7 @@
 @interface MKNetworkEngine (/*Private Methods*/)
 
 @property (strong, nonatomic) NSString *hostName;
+@property (strong, nonatomic) NSNumber *port;
 @property (strong, nonatomic) Reachability *reachability;
 @property (strong, nonatomic) NSDictionary *customHeaders;
 
@@ -50,6 +51,7 @@ static NSOperationQueue *_sharedNetworkQueue;
 
 @implementation MKNetworkEngine
 @synthesize hostName = _hostName;
+@synthesize port = _port;
 @synthesize reachability = _reachability;
 @synthesize customHeaders = _customHeaders;
 
@@ -80,6 +82,10 @@ static NSOperationQueue *_sharedNetworkQueue;
 }
 
 - (id) initWithHostName:(NSString*) hostName customHeaderFields:(NSDictionary*) headers {
+    return [self initWithHostName:hostName port:[NSNumber numberWithInt:80] customHeaderFields:headers];    
+}
+
+- (id) initWithHostName:(NSString*) hostName port:(NSNumber *) port customHeaderFields:(NSDictionary*) headers {
     
     if((self = [super init])) {        
         
@@ -89,8 +95,9 @@ static NSOperationQueue *_sharedNetworkQueue;
                                                          name:kReachabilityChangedNotification 
                                                        object:nil];
             
-            DLog(@"Engine initialized with host: %@", hostName);
-            self.hostName = hostName;            
+            DLog(@"Engine initialized with host: %@:%@", hostName, port);
+            self.hostName = hostName;
+            self.port = port;
             self.reachability = [Reachability reachabilityWithHostname:self.hostName];
             [self.reachability startNotifier];            
         }
@@ -99,8 +106,8 @@ static NSOperationQueue *_sharedNetworkQueue;
             
             NSMutableDictionary *newHeadersDict = [headers mutableCopy];
             NSString *userAgentString = [NSString stringWithFormat:@"%@/%@", 
-             [[[NSBundle mainBundle] infoDictionary] objectForKey:(NSString *)kCFBundleNameKey], 
-             [[[NSBundle mainBundle] infoDictionary] objectForKey:(NSString *)kCFBundleVersionKey]];
+                                         [[[NSBundle mainBundle] infoDictionary] objectForKey:(NSString *)kCFBundleNameKey], 
+                                         [[[NSBundle mainBundle] infoDictionary] objectForKey:(NSString *)kCFBundleVersionKey]];
             [newHeadersDict setObject:userAgentString forKey:@"User-Agent"];
             self.customHeaders = newHeadersDict;
         } else {
@@ -263,7 +270,7 @@ static NSOperationQueue *_sharedNetworkQueue;
                               httpMethod:(NSString*)method 
                                      ssl:(BOOL) useSSL {
     
-    NSString *urlString = [NSString stringWithFormat:@"%@://%@/%@", useSSL ? @"https" : @"http", self.hostName, path];
+    NSString *urlString = [NSString stringWithFormat:@"%@://%@:%@/%@", useSSL ? @"https" : @"http", self.hostName, self.port, path];
     
     return [self operationWithURLString:urlString params:body httpMethod:method];
 }
